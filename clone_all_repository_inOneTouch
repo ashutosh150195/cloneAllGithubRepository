@@ -1,0 +1,39 @@
+#!/bin/sh
+
+git_api_url="https://api.github.com/"
+org="DimensionDataGSOA" 
+#org : Name of repository's organisational name 
+credential_fetch_repo_url="username:key"
+#username : your github username
+#key : your github password
+credential_fetch_repo="username:key"
+#key should be in the form of encoded URL 
+#Use this link to encode your key : https://www.urlencoder.org/
+pwd="presentworking_directory"
+text_dir=${pwd}
+HTTPS="https://"
+
+
+if [ ! -d "$text_dir" ]; then
+  # Control will enter here if $DIRECTORY exists.
+	mkdir ${text_dir} 
+
+fi
+	curl -i ${git_api_url} -u ${credential_fetch_repo_url} > ${text_dir}set_git_api_url.txt
+  #Store frequent github API.
+	curl -i ${git_api_url}orgs/${org}/repos?type -u ${credential_fetch_repo_url} | grep clone_url > ${text_dir}get_repositry.txt
+  #Store all the existing repositories.
+	sed -i -e "s/\"clone_url\"://g" ${text_dir}get_repositry.txt
+	sed -i -e "s/,//g" ${text_dir}get_repositry.txt
+	sed -i -e "s/\"//g" ${text_dir}get_repositry.txt
+	sed -i -e "s/https:\/\///g" ${text_dir}get_repositry.txt
+  #Remove all the irrelevent string from the file.
+	LESSCHARSET=ascii less ${text_dir}get_repositry.txt
+  #need to close manually. 
+
+for line in `cat ${text_dir}get_repositry.txt`
+do
+git_url=$(echo $line | tr -d ' ')
+git clone ${HTTPS}${credential_fetch_repo}$git_url
+
+done
